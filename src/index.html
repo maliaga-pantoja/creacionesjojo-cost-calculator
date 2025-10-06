@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculadora de Costos de Impresión 3D</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/main.css">
+    <script src="https://kit.fontawesome.com/11045021b9.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container h-100" id="app">
+        <div class="row h-100 ">
+            <div class="col-sm-6 h-100">
+                <h1>Cotizacion 3d</h1>
+                <div class="input-group mb-3">
+                    <select name="filamentType" class="form-select"  v-model="filamentSelected">
+                        <option  v-for="option in filamentList" :value="option.cost">{{ option.text}}</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3" aria-label="impression time">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-clock"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Tiempo de impresion: 3.5 " v-model="impressionTime">
+                    <span class="input-group-text">horas</span>
+                </div>
+                <div class="input-group mb-3" >
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Peso en gramos: 10" v-model="impressionWeight">
+                    <span class="input-group-text">gramos</span>
+                </div>
+                <div class="input-group mb-3" aria-label="taxes">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-building"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Impuestos: 18" v-model="tax">
+                    <span class="input-group-text">%</span>
+                </div>
+                <div class="input-group mb-3" aria-label="impression profit margin">
+                    <span class="input-group-text">
+                        <i class="fa-solid fa-hand-holding-dollar"></i>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Porcentaje de ganancia" v-model="profit">
+                    <span class="input-group-text" >%</span>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="input-group mb-3">
+                            <button type="button" class="btn btn-primary w-100" @click="calculate">Calcular</button>
+                        </div>
+                        
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="input-group mb-3">
+                            <button type="button" class="btn btn-outline-danger w-100" @click="restart">Reiniciar</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 align-self-center h-100 ">
+                <h1>Presupuesto generado</h1>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Costos basicos</h5>
+                            <small>S/ {{ subtotal}}</small>
+                        </div>
+                        <p class="mb-1">Costo de energia, depreciacion, costto de material, operario y postprocesado</p>
+                        <small></small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Ganancia</h5>
+                            <small>S/ {{ subtotalWithProfit }}</small>
+                        </div>
+                        <p class="mb-1">Calculo del margen de ganancia</p>
+                        <small></small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Impuestos</h5>
+                            <small>S/ {{ totalTax }}</small>
+                        </div>
+                        <p class="mb-1">Calculo impuestos</p>
+                        <small></small>
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Costo Total</h5>
+                            <small>S/ {{ total }}</small>
+                        </div>
+                        <p class="mb-1">Calculo del costo total</p>
+                        <small></small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="assets/main.js"></script>
+
+
+</body>
+</html>
