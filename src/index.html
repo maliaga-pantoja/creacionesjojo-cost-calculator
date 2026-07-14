@@ -1,228 +1,521 @@
 <!DOCTYPE html>
-<html lang="es" data-bs-theme="dark">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Calculadora de Costos de Impresión 3D</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> -->
-    <link rel="stylesheet" href="assets/main.css">
-    <script src="https://kit.fontawesome.com/11045021b9.js" crossorigin="anonymous"></script>
-</head>
-<body>
-    <div class="container h-100" id="app">
-        <div class="row ">
-            <div class="col-sm-6 ">
-                <h1>Cotizacion 3d</h1>
-                <div class="input-group mb-3">
-                    <select name="filamentType" class="form-select" v-model="filamentSelected">
-                        <option value="0">Elige un tipo de filamento</option>
-                        <option v-for="option in filamentList" :value="option.cost">
-                            {{ option.text }} ({{ option.marca }} - {{ option.color }}) - S/ {{ option.cost }} por kg
-                        </option>
-                    </select>
-                </div>
-                <div class="input-group mb-3"  >
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-clock"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Tiempo de impresion: 3.5" v-model="impressionTime">
-                    <span class="input-group-text">horas</span>
-                </div>
-                <div class="input-group mb-3" >
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-scale-balanced"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Peso en gramos: 10" v-model="impressionWeight">
-                    <span class="input-group-text">gramos</span>
-                </div>
-                <div class="input-group mb-3" aria-label="taxes">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-building"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Impuestos: 18" v-model="tax">
-                    <span class="input-group-text">%</span>
-                </div>
-                <div class="input-group mb-3" aria-label="impression profit margin">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-hand-holding-dollar"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Porcentaje de ganancia" v-model="profit">
-                    <span class="input-group-text" >%</span>
-                </div>
-  
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-bolt-lightning"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Costo de energia/hora" v-model="energy">
-                    <span class="input-group-text" >hora</span>
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-print"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Depreciacion /hora del equipo" v-model="deprecation">
-                    <span class="input-group-text" >hora</span>
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-person-booth"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Costo de operario" v-model="workingCost">
-                    <!-- <span class="input-group-text" >%</span> -->
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-box-open"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Costo de postprocesado" v-model="postprocessingCost">
-                    <!-- <span class="input-group-text" >%</span> -->
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text">
-                        <i class="fa-solid fa-gift"></i>
-                    </span>
-                    <input type="text" class="form-control" placeholder="Costo de empaquetado" v-model="packagingCost">
-                </div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="input-group mb-3">
-                            <button type="button" class="btn btn-primary w-100" @click="calculate">Calcular</button>
-                        </div>
-                        
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="input-group mb-3">
-                            <button type="button" class="btn btn-outline-danger w-100" @click="restart">Reiniciar</button>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <h1>Presupuesto generado</h1>
-                <div class="list-group">
-                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Costos basicos</h5>
-                            <small>S/ {{ subtotal}}</small>
-                        </div>
-                        <p class="mb-1">Costo de energía, depreciación, costo de material, operario, postprocesado y empaquetado</p>
-                        <small></small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Ganancia</h5>
-                            <small>S/ {{ subtotalWithProfit }}</small>
-                        </div>
-                        <p class="mb-1">Calculo del margen de ganancia</p>
-                        <small></small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action " aria-current="true">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Impuestos</h5>
-                            <small>S/ {{ totalTax }}</small>
-                        </div>
-                        <p class="mb-1">Calculo impuestos</p>
-                        <small></small>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">Costo Total</h5>
-                            <small>S/ {{ total }}</small>
-                        </div>
-                        <p class="mb-1">Calculo del costo total</p>
-                        <small></small>
-                    </a>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Sección de Gestión de Filamentos -->
-        <div class="row mt-5 border-top pt-4">
-            <div class="col-12 mb-3">
-                <h3><i class="fa-solid fa-boxes-stacked me-2"></i>Gestión de Filamentos</h3>
-            </div>
-            
-            <!-- Formulario de Filamento -->
-            <div class="col-md-4">
-                <div class="card p-3 mb-3 bg-dark-subtle border-secondary">
-                    <h5 class="card-title text-primary">
-                        <i class="fa-solid" :class="editingIndex === -1 ? 'fa-plus' : 'fa-pen-to-square'"></i>
-                        {{ editingIndex === -1 ? ' Agregar Filamento' : ' Editar Filamento' }}
-                    </h5>
-                    <div class="mb-2">
-                        <label class="form-label">Nombre para mostrar</label>
-                        <input type="text" class="form-control" v-model="filamentForm.text" placeholder="Ej: PLA, PETG, etc.">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Marca</label>
-                        <input type="text" class="form-control" v-model="filamentForm.marca" placeholder="Ej: Inkfaill, Esun">
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Color</label>
-                        <input type="text" class="form-control" v-model="filamentForm.color" placeholder="Ej: Negro, Rojo, Translúcido">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Precio por kg (S/)</label>
-                        <input type="number" class="form-control" v-model="filamentForm.cost" placeholder="Ej: 50" min="0" step="any">
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary flex-grow-1" @click="saveFilament">
-                            {{ editingIndex === -1 ? 'Agregar' : 'Guardar' }}
-                        </button>
-                        <button class="btn btn-outline-secondary" @click="clearForm" v-if="editingIndex !== -1">
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Tabla de Filamentos -->
-            <div class="col-md-8">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle border-secondary">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Marca</th>
-                                <th>Color</th>
-                                <th>Precio/kg</th>
-                                <th class="text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="(fil, index) in filamentList" :key="index">
-                                <td><strong>{{ fil.text }}</strong></td>
-                                <td>{{ fil.marca }}</td>
-                                <td>
-                                    <span class="badge bg-secondary">{{ fil.color }}</span>
-                                </td>
-                                <td>S/ {{ fil.cost }}</td>
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-info me-2" @click="editFilament(index)">
-                                        <i class="fa-solid fa-pen"></i> Editar
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger" @click="deleteFilament(index)">
-                                        <i class="fa-solid fa-trash"></i> Eliminar
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr v-if="filamentList.length === 0">
-                                <td colspan="5" class="text-center text-muted">No hay filamentos registrados. ¡Agrega uno nuevo!</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreacionesJoJo - 3D Cost Calculator</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=block" rel="stylesheet">
+    
+    <!-- Vue -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="assets/main.js"></script>
+    
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        try {
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        "colors": {
+                            "primary": "#a78bfa",
+                            "on-primary": "#1e1b4b",
+                            "primary-container": "#4c1d95",
+                            "on-primary-container": "#ddd6fe",
+                            "secondary": "#c4b5fd",
+                            "on-secondary": "#2e1065",
+                            "secondary-container": "#4c1d95",
+                            "on-secondary-container": "#ede9fe",
+                            "tertiary": "#fcd34d",
+                            "background": "#000000",
+                            "on-background": "#f8fafc",
+                            "surface": "#0a0a0a",
+                            "on-surface": "#f8fafc",
+                            "surface-variant": "#171717",
+                            "on-surface-variant": "#a3a3a3",
+                            "outline": "#404040",
+                            "outline-variant": "#262626",
+                            "surface-container-lowest": "#000000",
+                            "surface-container-low": "#0f0f0f",
+                            "surface-container": "#141414",
+                            "surface-container-high": "#1c1c1c",
+                            "surface-container-highest": "#262626",
+                            "error": "#ef4444",
+                            "on-error": "#450a0a"
+                        },
+                        "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                        },
+                        "spacing": {
+                            "xl": "48px",
+                            "container-max": "1100px",
+                            "sm": "12px",
+                            "gutter": "16px",
+                            "xs": "8px",
+                            "md": "20px",
+                            "lg": "32px",
+                            "base": "4px"
+                        },
+                        "fontFamily": {
+                            "headline-md-mobile": ["Hanken Grotesk"],
+                            "body-sm": ["Hanken Grotesk"],
+                            "body-lg": ["Hanken Grotesk"],
+                            "label-mono": ["JetBrains Mono"],
+                            "display": ["Hanken Grotesk"],
+                            "headline-md": ["Hanken Grotesk"]
+                        }
+                    }
+                }
+            }
+        } catch (_e) {}
+    </script>
+    <link rel="stylesheet" href="./assets/main.css">
+</head>
+<body class="text-on-background min-h-screen font-body-lg selection:bg-primary selection:text-on-primary bg-background" style="background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px); background-size: 24px 24px; background-color: #000000;">
+    <div id="app" v-cloak>
+        <!-- TopAppBar (Mobile) -->
+        <header class="bg-surface/90 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 fixed top-0 z-50 md:hidden">
+            <h1 class="font-display text-display text-on-surface">CreacionesJoJo</h1>
+            <div class="flex gap-4">
+                <span class="material-symbols-outlined text-primary">settings</span>
+                <span class="material-symbols-outlined text-primary">notifications</span>
+            </div>
+        </header>
 
+        <!-- SideNavBar (Desktop) -->
+        <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 pt-16 bg-surface-container-low/95 backdrop-blur-md border-r border-outline-variant py-md z-40">
+            <div class="px-4 py-6 mb-4">
+                <h2 class="font-display text-headline-md text-primary font-bold">CreacionesJoJo</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">3D Cost Expert</p>
+            </div>
+            
+            <nav class="flex-1 space-y-1">
+                <a href="#" @click.prevent="changeTab('filamentos')" :class="['transition-all px-4 py-3 mx-2 flex items-center gap-3 rounded-lg', activeTab === 'filamentos' ? 'bg-primary text-on-primary shadow-lg shadow-primary/20 translate-x-1' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest']">
+                    <span class="material-symbols-outlined">layers</span>
+                    <span class="font-body-sm" :class="{'font-semibold': activeTab === 'filamentos'}">Filamentos</span>
+                </a>
+                <a href="#" @click.prevent="changeTab('operacion')" :class="['transition-all px-4 py-3 mx-2 flex items-center gap-3 rounded-lg', activeTab === 'operacion' ? 'bg-primary text-on-primary shadow-lg shadow-primary/20 translate-x-1' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest']">
+                    <span class="material-symbols-outlined">precision_manufacturing</span>
+                    <span class="font-body-sm" :class="{'font-semibold': activeTab === 'operacion'}">Costos Operación</span>
+                </a>
+                <a href="#" @click.prevent="changeTab('cotizacion')" :class="['transition-all px-4 py-3 mx-2 flex items-center gap-3 rounded-lg', activeTab === 'cotizacion' ? 'bg-primary text-on-primary shadow-lg shadow-primary/20 translate-x-1' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest']">
+                    <span class="material-symbols-outlined">calculate</span>
+                    <span class="font-body-sm" :class="{'font-semibold': activeTab === 'cotizacion'}">Calculadora</span>
+                </a>
+            </nav>
+        </aside>
 
+        <!-- Main Content -->
+        <main class="md:ml-64 pt-20 md:pt-16 pb-24 px-gutter max-w-container-max mx-auto">
+            
+            <!-- COTIZACION TAB -->
+            <div v-show="activeTab === 'cotizacion'" class="animate-fadeIn">
+                <header class="flex flex-col gap-2 mt-8 mb-8">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-3xl">calculate</span>
+                        <h1 class="font-display text-display text-on-surface">Calculadora de Costos</h1>
+                    </div>
+                    <p class="text-on-surface-variant font-body-sm max-w-2xl">Herramienta profesional para la gestión de cotizaciones de impresión 3D.</p>
+                </header>
+
+                <div class="grid grid-cols-12 gap-lg">
+                    <!-- Quotation Form -->
+                    <div class="col-span-12 lg:col-span-8 space-y-md">
+                        <section class="bg-surface-container/80 backdrop-blur-md border border-outline-variant p-md rounded-lg shadow-2xl">
+                            <div class="flex items-center gap-xs mb-md border-b border-outline-variant pb-xs">
+                                <span class="material-symbols-outlined text-primary">analytics</span>
+                                <h2 class="font-headline-md text-headline-md uppercase tracking-wider text-on-surface">Cotización 3D</h2>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block font-label-mono text-label-mono text-primary uppercase mb-xs opacity-80">Tipo de Filamento</label>
+                                    <div class="relative">
+                                        <select v-model="filamentSelected" class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded-sm transition-all outline-none">
+                                            <option value="0">Seleccionar Filamento</option>
+                                            <option v-for="fil in filamentList" :value="fil.cost">{{ fil.text }} - {{ fil.marca }} ({{ fil.color }}) - $ {{ fil.cost }} kg</option>
+                                        </select>
+                                        <span class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-primary/60">expand_more</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block font-label-mono text-label-mono text-primary uppercase mb-xs opacity-80">Tiempo (Horas)</label>
+                                    <div class="relative">
+                                        <input v-model="impressionTime" type="number" placeholder="Ej: 3.5" class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                        <span class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">HRS</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block font-label-mono text-label-mono text-primary uppercase mb-xs opacity-80">Peso (Gramos)</label>
+                                    <div class="relative">
+                                        <input v-model="impressionWeight" type="number" placeholder="Ej: 150" class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                        <span class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">GRS</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </section>
+
+                        <div class="flex flex-col sm:flex-row gap-md">
+                            <button @click="calculate" class="flex-1 bg-primary text-on-primary py-md rounded-sm uppercase tracking-widest hover:brightness-110 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-sm font-body-lg font-light">
+                                <span class="material-symbols-outlined">calculate</span> Calcular Presupuesto
+                            </button>
+                            <button @click="restart" class="flex-1 border border-error text-error py-md rounded-sm uppercase tracking-widest hover:bg-error/10 active:scale-[0.98] transition-all flex items-center justify-center gap-sm font-body-lg font-light">
+                                <span class="material-symbols-outlined">refresh</span> Reiniciar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary Sidebar -->
+                    <div class="col-span-12 lg:col-span-4">
+                        <div class="sticky top-24 bg-surface-container/90 backdrop-blur-md border border-outline-variant p-md rounded-lg space-y-lg shadow-2xl overflow-hidden relative">
+                            <!-- Accent Glow -->
+                            <div class="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+                            
+                            <div class="flex items-center gap-xs border-b border-outline-variant pb-xs">
+                                <span class="material-symbols-outlined text-primary">receipt_long</span>
+                                <h2 class="font-headline-md text-headline-md uppercase tracking-wider text-on-surface">Presupuesto</h2>
+                            </div>
+                            <div class="space-y-md">
+                                <div class="flex justify-between items-start">
+                                    <div class="max-w-[70%]">
+                                        <p class="font-headline-md text-on-surface">Costos Básicos</p>
+                                        <p class="text-[10px] text-on-surface-variant leading-tight">Energía, depreciación, material, operario, postprocesado.</p>
+                                    </div>
+                                    <span class="font-label-mono text-headline-md text-on-surface">$ {{ subtotal.toFixed(2) }}</span>
+                                </div>
+                                <div class="flex justify-between items-start">
+                                    <div class="max-w-[70%]">
+                                        <p class="font-headline-md text-on-surface">Ganancia Esperada</p>
+                                        <p class="text-[10px] text-on-surface-variant leading-tight">Monto calculado según el margen de ganancia configurado.</p>
+                                    </div>
+                                    <span class="font-label-mono text-headline-md text-on-surface">$ {{ subtotalWithProfit.toFixed(2) }}</span>
+                                </div>
+                                <div class="flex justify-between items-start">
+                                    <div class="max-w-[70%]">
+                                        <p class="font-headline-md text-on-surface">Impuestos</p>
+                                        <p class="text-[10px] text-on-surface-variant leading-tight">Impuestos aplicados sobre la producción total.</p>
+                                    </div>
+                                    <span class="font-label-mono text-headline-md text-on-surface">$ {{ totalTax.toFixed(2) }}</span>
+                                </div>
+                            </div>
+                            <div class="relative h-px bg-outline-variant w-full overflow-hidden mt-md mb-md">
+                                <div class="absolute inset-0 bg-primary/20 animate-pulse"></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-end mb-xs">
+                                    <div>
+                                        <h3 class="font-display text-headline-md text-primary uppercase">Costo Total</h3>
+                                        <p class="text-[10px] text-on-surface-variant">Precio de venta sugerido para el cliente.</p>
+                                    </div>
+                                    <span class="font-label-mono text-primary drop-shadow-[0_0_15px_rgba(167,139,250,0.4)] text-2xl font-bold whitespace-nowrap">$ {{ total.toFixed(2) }}</span>
+                                </div>
+                            </div>
+                            <button @click="window.print()" class="w-full mt-md bg-surface-container-highest border border-outline text-on-surface py-sm uppercase tracking-tighter hover:bg-surface-variant hover:text-primary transition-all flex items-center justify-center gap-sm rounded-sm font-body-lg font-light">
+                                <span class="material-symbols-outlined text-body-sm">print</span>
+                                Exportar PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FILAMENTOS TAB -->
+            <div v-show="activeTab === 'filamentos'" class="animate-fadeIn">
+                <header class="flex flex-col gap-2 mt-8 mb-8">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary text-3xl">inventory_2</span>
+                        <h3 class="font-display text-display text-on-surface">Gestión de Filamentos</h3>
+                    </div>
+                    <p class="text-on-surface-variant font-body-sm max-w-2xl">Administra tu inventario de materiales para cálculos precisos.</p>
+                </header>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+                    <section class="lg:col-span-4 bg-surface-container/80 backdrop-blur-md rounded p-lg border border-outline-variant flex flex-col gap-md shadow-2xl">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-primary text-sm">add_circle</span>
+                            <h4 class="font-headline-md text-headline-md text-primary">{{ editingIndex === -1 ? 'Agregar' : 'Editar' }} Filamento</h4>
+                        </div>
+                        <form @submit.prevent="saveFilament" class="flex flex-col gap-sm">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Nombre para mostrar</label>
+                                <div class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">label</span>
+                                    <input v-model="filamentForm.text" type="text" placeholder="Ej: PLA" class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Marca</label>
+                                <div class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">branding_watermark</span>
+                                    <input v-model="filamentForm.marca" type="text" placeholder="Ej: eSUN" class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Color</label>
+                                <div class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">palette</span>
+                                    <input v-model="filamentForm.color" type="text" placeholder="Ej: Negro" class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Precio por kg ($)</label>
+                                <div class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    <span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">payments</span>
+                                    <input v-model="filamentForm.cost" type="number" placeholder="50" class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                </div>
+                            </div>
+                            <div class="flex gap-2 mt-4">
+                                <button type="submit" class="flex-1 bg-primary text-on-primary font-body-lg h-12 rounded hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 font-light shadow-[0_0_20px_rgba(167,139,250,0.4)]">
+                                    <span class="material-symbols-outlined">save</span> GUARDAR
+                                </button>
+                                <button v-if="editingIndex !== -1" @click.prevent="clearForm" type="button" class="border border-outline text-on-surface px-4 h-12 rounded hover:bg-surface-container-high transition-colors">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="lg:col-span-8 bg-surface-container/80 backdrop-blur-md rounded border border-outline-variant overflow-hidden shadow-2xl flex flex-col justify-between">
+                        <div class="p-gutter md:p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-high">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">list</span>
+                                <span class="font-label-mono text-label-mono text-on-surface uppercase tracking-widest">Inventario Activo</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="border border-outline p-1.5 rounded hover:bg-surface-container-highest transition-colors text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-sm">filter_list</span>
+                                </button>
+                                <button class="border border-outline p-1.5 rounded hover:bg-surface-container-highest transition-colors text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-sm">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-body-sm">
+                                <thead>
+                                    <tr class="border-b border-outline-variant bg-surface-container-low">
+                                        <th class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">Nombre</th>
+                                        <th class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">Marca</th>
+                                        <th class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">Color</th>
+                                        <th class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">Precio/kg</th>
+                                        <th class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase text-right">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant">
+                                    <tr v-for="(fil, idx) in filamentList" :key="idx" class="hover:bg-surface-container-high transition-colors">
+                                        <td class="px-gutter py-4 font-bold text-on-surface">{{ fil.text }}</td>
+                                        <td class="px-gutter py-4 text-on-surface-variant">{{ fil.marca }}</td>
+                                        <td class="px-gutter py-4 text-on-surface-variant">{{ fil.color }}</td>
+                                        <td class="px-gutter py-4 font-label-mono text-primary font-bold">$ {{ fil.cost }}</td>
+                                        <td class="px-gutter py-4 text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <button @click="editFilament(idx)" class="flex items-center gap-1.5 text-primary hover:bg-primary/10 px-3 py-1.5 rounded border border-primary/20 transition-all font-body-sm font-light">
+                                                    <span class="material-symbols-outlined text-sm">edit</span> <span class="text-xs uppercase">Editar</span>
+                                                </button>
+                                                <button @click="deleteFilament(idx)" class="flex items-center gap-1.5 text-error hover:bg-error/10 px-3 py-1.5 rounded border border-error/20 transition-all font-body-sm font-light">
+                                                    <span class="material-symbols-outlined text-sm">delete</span> <span class="text-xs uppercase">Eliminar</span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="p-gutter bg-surface-container-low flex justify-center border-t border-outline-variant mt-auto">
+                            <div class="flex items-center gap-4 text-on-surface-variant font-label-mono text-label-mono">
+                                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">chevron_left</span>
+                                <span class="text-on-surface">Página 1 de 1</span>
+                                <span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors">chevron_right</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                
+                <!-- Dashboard Visual Asset -->
+                <section class="relative w-full h-48 rounded border border-outline-variant mt-lg group bg-surface-container overflow-hidden shadow-xl">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 z-10">
+                        <p class="font-label-mono text-label-mono text-primary uppercase mb-2 font-bold tracking-widest">Technical Insight</p>
+                        <p class="font-body-sm text-on-surface-variant max-w-lg">
+                            El costo de los filamentos fluctúa según el mercado local. Se recomienda actualizar periódicamente para mantener la rentabilidad de sus cotizaciones.
+                        </p>
+                    </div>
+                    <div class="absolute right-6 top-1/2 -translate-y-1/2 hidden lg:block opacity-5 group-hover:opacity-20 transition-opacity">
+                        <span class="material-symbols-outlined text-9xl text-primary">3d_rotation</span>
+                    </div>
+                </section>
+            </div>
+
+            <!-- OPERACION TAB -->
+            <div v-show="activeTab === 'operacion'" class="animate-fadeIn">
+                <div class="mb-lg flex flex-col md:flex-row md:items-end justify-between gap-4 mt-8">
+                    <div>
+                        <h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">precision_manufacturing</span> Costos de Operación
+                        </h2>
+                        <p class="text-on-surface-variant font-body-sm max-w-2xl mt-2">Define the fixed hourly rates and per-unit expenses that form the baseline of your 3D printing business. Accurate data here ensures profitable quoting.</p>
+                    </div>
+                    <div class="flex items-center gap-2 bg-surface-container-high px-sm py-xs rounded border border-outline-variant">
+                        <span class="font-label-mono text-label-mono text-secondary">CURRENCY: $ (USD)</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+                    <section class="lg:col-span-7 space-y-md">
+                        <div class="bg-surface-container/80 backdrop-blur-md rounded-lg border border-outline-variant p-md lg:p-lg space-y-lg shadow-xl">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">bolt</span> Energía / Hora
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">$ </span>
+                                        <input v-model="energy" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="0.7" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">print</span> Depreciación / Hora
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">$ </span>
+                                        <input v-model="deprecation" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="0.5" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">person</span> Operario
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">$ </span>
+                                        <input v-model="workingCost" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="5" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">draw</span> Postprocesado
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">$ </span>
+                                        <input v-model="postprocessingCost" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="3" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">inventory_2</span> Empaquetado
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">$ </span>
+                                        <input v-model="packagingCost" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="2" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">request_quote</span> Impuestos (%)
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">% </span>
+                                        <input v-model="tax" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="18" step="0.01">
+                                    </div>
+                                </div>
+                                <div class="space-y-xs group md:col-span-2">
+                                    <label class="font-label-mono text-label-mono text-on-surface-variant uppercase flex items-center gap-2 group-focus-within:text-primary transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">trending_up</span> Margen de Ganancia (%)
+                                    </label>
+                                    <div class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">% </span>
+                                        <input v-model="profit" type="number" class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3" placeholder="30" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <aside class="lg:col-span-5 space-y-md">
+                        <!-- Save Actions -->
+                        <div class="bg-surface-container/80 backdrop-blur-md rounded-lg border border-outline-variant p-md lg:p-lg shadow-xl flex flex-col gap-md relative overflow-hidden">
+                            <!-- Accent Glow -->
+                            <div class="absolute -top-16 -right-16 w-48 h-48 bg-primary/10 blur-[80px] rounded-full pointer-events-none"></div>
+                            <h3 class="font-headline-md text-on-surface flex items-center gap-2 mb-xs relative z-10">
+                                <span class="material-symbols-outlined text-primary">save</span>
+                                Guardar Configuración
+                            </h3>
+                            <p class="font-body-sm text-on-surface-variant mb-xs relative z-10">Asegúrate de guardar los cambios para que se apliquen como base en tus cálculos de cotizaciones.</p>
+                            <button @click="saveSettings" class="w-full bg-primary text-on-primary py-md rounded-sm uppercase tracking-widest hover:brightness-110 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-sm font-body-lg font-light mt-xs relative z-10">
+                                <span class="material-symbols-outlined">check_circle</span> Guardar Datos
+                            </button>
+                        </div>
+
+                        <div class="bg-surface-container/60 backdrop-blur-sm rounded-lg border border-outline-variant p-md">
+                            <h4 class="font-label-mono text-label-mono text-primary flex items-center gap-2 mb-sm uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-[16px]">info</span> Quick Tip
+                            </h4>
+                            <p class="font-body-sm text-on-surface-variant">Estos valores fijos se usarán cada vez que realices una cotización. Modificarlos afectará a los cálculos actuales que realices en la pestaña de calculadora.</p>
+                        </div>
+                    </aside>
+                </div>
+                
+                <!-- Historical Reference or Chart Section (Bento Style) -->
+                <section class="mt-lg grid grid-cols-1 md:grid-cols-3 gap-md">
+                    <div class="md:col-span-2 bg-surface-container/60 backdrop-blur-sm rounded-lg border border-outline-variant p-md flex items-center justify-center min-h-[200px] relative group cursor-pointer hover:border-primary/50 transition-all shadow-xl">
+                        <div class="text-center z-10">
+                            <span class="material-symbols-outlined text-4xl text-outline-variant group-hover:text-primary transition-colors">show_chart</span>
+                            <p class="font-label-mono text-label-mono text-outline-variant group-hover:text-primary mt-2">COST VARIATION TRENDS (COMING SOON)</p>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container/60 backdrop-blur-sm rounded-lg border border-outline-variant p-md flex flex-col justify-between shadow-xl">
+                        <div>
+                            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase mb-2">Last Update</h4>
+                            <p class="font-headline-md text-on-surface">24 Oct, 2023</p>
+                        </div>
+                        <div class="pt-sm border-t border-outline-variant">
+                            <a class="text-primary font-label-mono text-label-mono flex items-center gap-2 hover:gap-3 transition-all" href="#">
+                                VIEW HISTORY
+                                <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+        </main>
+
+        <!-- Navigation for Mobile -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-lg border-t border-outline-variant flex justify-around items-center h-16 px-4 z-50">
+            <button @click="changeTab('filamentos')" :class="['flex flex-col items-center gap-1 transition-colors', activeTab === 'filamentos' ? 'text-primary' : 'text-on-surface-variant']">
+                <span class="material-symbols-outlined">layers</span>
+                <span class="text-[10px] font-label-mono uppercase">Fila</span>
+            </button>
+            <button @click="changeTab('operacion')" :class="['flex flex-col items-center gap-1 transition-colors', activeTab === 'operacion' ? 'text-primary' : 'text-on-surface-variant']">
+                <span class="material-symbols-outlined" :style="activeTab === 'operacion' ? 'font-variation-settings: \'FILL\' 1;' : ''">precision_manufacturing</span>
+                <span class="text-[10px] font-label-mono uppercase">Cost</span>
+            </button>
+            <button @click="changeTab('cotizacion')" :class="['flex flex-col items-center gap-1 transition-colors', activeTab === 'cotizacion' ? 'text-primary' : 'text-on-surface-variant']">
+                <span class="material-symbols-outlined">calculate</span>
+                <span class="text-[10px] font-label-mono uppercase">Calc</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Bootstrap is not heavily needed for tailwind but required in original setup for tooltip -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./assets/main.js"></script>
+    
+    <style>
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </body>
 </html>
