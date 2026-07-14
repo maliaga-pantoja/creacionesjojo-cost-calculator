@@ -5,16 +5,49 @@
   
   createApp({
     setup() {
+      let activeTab = ref('cotizacion')
+      
+      const changeTab = (tab) => {
+        activeTab.value = tab
+      }
+
       let filamentSelected = ref("0")
-      let energy = ref() // costo energia electrica x hora 0.7
-      let deprecation = ref() // costo depreciacion del equipo por hora 0.5
-      let workingCost = ref() // costo de operacion 5
-      let postprocessingCost = ref() // costo del post procesado 3
-      let packagingCost = ref() // costo de empaquetado
       let impressionTime = ref()
-      let profit = ref() // porcentaje de ganancia
-      let tax = ref() // impuestos
       let impressionWeight = ref()
+
+      // Load operation settings from localStorage
+      const loadSettings = () => {
+        const stored = localStorage.getItem('operation_settings')
+        if (stored) {
+          try {
+            return JSON.parse(stored)
+          } catch(e) {}
+        }
+        return {}
+      }
+      const savedSettings = loadSettings()
+
+      let energy = ref(savedSettings.energy || null)
+      let deprecation = ref(savedSettings.deprecation || null)
+      let workingCost = ref(savedSettings.workingCost || null)
+      let postprocessingCost = ref(savedSettings.postprocessingCost || null)
+      let packagingCost = ref(savedSettings.packagingCost || null)
+      let profit = ref(savedSettings.profit || null)
+      let tax = ref(savedSettings.tax || null)
+
+      const saveSettings = () => {
+        const settings = {
+          energy: energy.value,
+          deprecation: deprecation.value,
+          workingCost: workingCost.value,
+          postprocessingCost: postprocessingCost.value,
+          packagingCost: packagingCost.value,
+          profit: profit.value,
+          tax: tax.value
+        }
+        localStorage.setItem('operation_settings', JSON.stringify(settings))
+        alert('¡Configuración guardada exitosamente!')
+      }
 
       // CRUD Filaments Logic
       const loadFilaments = () => {
@@ -137,6 +170,7 @@
       }
 
       return {
+        activeTab, changeTab,
         impressionTime,
         filamentSelected,
         filamentList,
@@ -145,7 +179,7 @@
         calculate, restart,
         subtotal, subtotalWithProfit, totalTax, total,
         energy, deprecation, workingCost, postprocessingCost, packagingCost,
-        filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm
+        filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings
       }
     }
   }).mount('#app')
