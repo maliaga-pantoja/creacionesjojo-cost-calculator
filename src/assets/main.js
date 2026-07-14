@@ -35,6 +35,10 @@
       let profit = ref(savedSettings.profit !== undefined && savedSettings.profit !== null ? savedSettings.profit : 30)
       let tax = ref(savedSettings.tax !== undefined && savedSettings.tax !== null ? savedSettings.tax : 18)
 
+      let businessName = ref(savedSettings.businessName || 'CreacionesJoJo')
+      let businessSubtitle = ref(savedSettings.businessSubtitle || '3D Cost Expert')
+      let currency = ref(savedSettings.currency || '$')
+
       const saveSettings = () => {
         const settings = {
           energy: energy.value,
@@ -43,7 +47,10 @@
           postprocessingCost: postprocessingCost.value,
           packagingCost: packagingCost.value,
           profit: profit.value,
-          tax: tax.value
+          tax: tax.value,
+          businessName: businessName.value,
+          businessSubtitle: businessSubtitle.value,
+          currency: currency.value
         }
         localStorage.setItem('operation_settings', JSON.stringify(settings))
         alert('¡Configuración guardada exitosamente!')
@@ -204,7 +211,7 @@
         subtotal, subtotalWithProfit, totalTax, total, calculated,
         energy, deprecation, workingCost, postprocessingCost, packagingCost,
         filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings,
-        exportPDF
+        exportPDF, businessName, businessSubtitle, currency
       }
     }
   }).mount('#app')
