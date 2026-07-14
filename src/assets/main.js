@@ -5,13 +5,13 @@
   
   createApp({
     setup() {
-      let activeTab = ref('cotizacion')
+      let activeTab = ref('filamentos')
       
       const changeTab = (tab) => {
         activeTab.value = tab
       }
 
-      let filamentSelected = ref("0")
+      let filamentSelected = ref(null)
       let impressionTime = ref()
       let impressionWeight = ref()
 
@@ -27,13 +27,13 @@
       }
       const savedSettings = loadSettings()
 
-      let energy = ref(savedSettings.energy || null)
-      let deprecation = ref(savedSettings.deprecation || null)
-      let workingCost = ref(savedSettings.workingCost || null)
-      let postprocessingCost = ref(savedSettings.postprocessingCost || null)
-      let packagingCost = ref(savedSettings.packagingCost || null)
-      let profit = ref(savedSettings.profit || null)
-      let tax = ref(savedSettings.tax || null)
+      let energy = ref(savedSettings.energy !== undefined && savedSettings.energy !== null ? savedSettings.energy : 0.7)
+      let deprecation = ref(savedSettings.deprecation !== undefined && savedSettings.deprecation !== null ? savedSettings.deprecation : 0.5)
+      let workingCost = ref(savedSettings.workingCost !== undefined && savedSettings.workingCost !== null ? savedSettings.workingCost : 5)
+      let postprocessingCost = ref(savedSettings.postprocessingCost !== undefined && savedSettings.postprocessingCost !== null ? savedSettings.postprocessingCost : 3)
+      let packagingCost = ref(savedSettings.packagingCost !== undefined && savedSettings.packagingCost !== null ? savedSettings.packagingCost : 2)
+      let profit = ref(savedSettings.profit !== undefined && savedSettings.profit !== null ? savedSettings.profit : 30)
+      let tax = ref(savedSettings.tax !== undefined && savedSettings.tax !== null ? savedSettings.tax : 18)
 
       const saveSettings = () => {
         const settings = {
@@ -141,32 +141,56 @@
       let subtotalWithProfit = ref(0)
       let totalTax = ref(0)
       let total = ref(0)
+      let calculated = ref(false)
 
       const calculate = () => {
+        if (!filamentSelected.value) {
+          alert("Por favor, selecciona un tipo de filamento.")
+          return
+        }
+        if (!impressionTime.value || parseFloat(impressionTime.value) <= 0) {
+          alert("Por favor, ingresa un tiempo de impresión válido (mayor a 0).")
+          return
+        }
+        if (!impressionWeight.value || parseFloat(impressionWeight.value) <= 0) {
+          alert("Por favor, ingresa un peso de impresión válido (mayor a 0).")
+          return
+        }
+
         const totalEnergy = parseFloat(energy.value || 0) * parseFloat(impressionTime.value || 0)
         const totalDeprecation = parseFloat(deprecation.value || 0) * parseFloat(impressionTime.value || 0)
-        const totalMaterialCost = (parseFloat(impressionWeight.value || 0) / 1000) * parseFloat(filamentSelected.value || 0)
+        const filamentCost = (filamentSelected.value && filamentSelected.value.cost) ? parseFloat(filamentSelected.value.cost) : 0
+        const totalMaterialCost = (parseFloat(impressionWeight.value || 0) / 1000) * filamentCost
         subtotal.value = totalEnergy + totalDeprecation + totalMaterialCost + parseFloat(workingCost.value || 0) + parseFloat(postprocessingCost.value || 0) + parseFloat(packagingCost.value || 0)
         subtotalWithProfit.value = Math.round(( (subtotal.value * ( 1 + (parseFloat(profit.value || 0) / 100))) - subtotal.value) * 100) / 100
         totalTax.value =  Math.round( ((subtotalWithProfit.value +  subtotal.value) * parseFloat(tax.value || 0) / 100) * 100) / 100
         total.value =  Math.round( (subtotal.value + subtotalWithProfit.value + totalTax.value) * 100) / 100
+        calculated.value = true
       }
 
       const restart = () => {
-        filamentSelected.value = "0"
+        filamentSelected.value = null
         impressionTime.value = null
-        profit.value = null
-        tax.value = null
         impressionWeight.value = null
         subtotal.value = 0
         subtotalWithProfit.value = 0
         totalTax.value = 0
         total.value = 0
-        energy.value = null
-        deprecation.value = null
-        workingCost.value = null
-        postprocessingCost.value = null
-        packagingCost.value = null
+        calculated.value = false
+
+        // Restablecer costos de operación a sus valores guardados o predeterminados
+        const currentSettings = loadSettings()
+        energy.value = currentSettings.energy !== undefined && currentSettings.energy !== null ? currentSettings.energy : 0.7
+        deprecation.value = currentSettings.deprecation !== undefined && currentSettings.deprecation !== null ? currentSettings.deprecation : 0.5
+        workingCost.value = currentSettings.workingCost !== undefined && currentSettings.workingCost !== null ? currentSettings.workingCost : 5
+        postprocessingCost.value = currentSettings.postprocessingCost !== undefined && currentSettings.postprocessingCost !== null ? currentSettings.postprocessingCost : 3
+        packagingCost.value = currentSettings.packagingCost !== undefined && currentSettings.packagingCost !== null ? currentSettings.packagingCost : 2
+        profit.value = currentSettings.profit !== undefined && currentSettings.profit !== null ? currentSettings.profit : 30
+        tax.value = currentSettings.tax !== undefined && currentSettings.tax !== null ? currentSettings.tax : 18
+      }
+
+      const exportPDF = () => {
+        window.print()
       }
 
       return {
@@ -177,9 +201,10 @@
         impressionWeight,
         tax, profit,
         calculate, restart,
-        subtotal, subtotalWithProfit, totalTax, total,
+        subtotal, subtotalWithProfit, totalTax, total, calculated,
         energy, deprecation, workingCost, postprocessingCost, packagingCost,
-        filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings
+        filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings,
+        exportPDF
       }
     }
   }).mount('#app')

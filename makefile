@@ -1,5 +1,8 @@
 PWD=$(shell pwd)
+build:
+	docker build -t creacionesjojo-cost-calculator .
+
 run:
 	docker run --rm -p 9001:80 -d \
 		-e TZ=America/Lima \
-	-v ${PWD}/src:/usr/share/nginx/html:ro nginx
+		-v ${PWD}/src:/usr/share/nginx/html:ro nginx
