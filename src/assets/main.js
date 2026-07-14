@@ -11,6 +11,31 @@
         activeTab.value = tab
       }
 
+      // ── Theme ──────────────────────────────────────────────
+      const storedTheme = localStorage.getItem('theme')
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const startDark = storedTheme ? storedTheme === 'dark' : prefersDark
+      const isDark = ref(startDark)
+
+      // Sync the html class on startup
+      if (startDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      const toggleTheme = () => {
+        isDark.value = !isDark.value
+        if (isDark.value) {
+          document.documentElement.classList.add('dark')
+          localStorage.setItem('theme', 'dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+          localStorage.setItem('theme', 'light')
+        }
+      }
+      // ──────────────────────────────────────────────────────
+
       let filamentSelected = ref(null)
       let impressionTime = ref()
       let impressionWeight = ref()
@@ -202,6 +227,7 @@
 
       return {
         activeTab, changeTab,
+        isDark, toggleTheme,
         impressionTime,
         filamentSelected,
         filamentList,
@@ -214,4 +240,4 @@
         exportPDF, businessName, businessSubtitle, currency
       }
     }
-  }).mount('#app')
+  }).mount('#app')
