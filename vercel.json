@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "buildCommand": "# Static site",
+  "outputDirectory": "src",
+  "cleanUrls": true,
+  "trailingSlash": false
+}
