@@ -1,11 +1,21 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Cost Calculator</title>
     <link rel="icon" type="image/png" href="./assets/favicon.png">
+
+    <!-- Theme initialization: runs before Vue to avoid flash -->
+    <script>
+        (function() {
+            var stored = localStorage.getItem('theme');
+            var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var dark = stored ? stored === 'dark' : prefersDark;
+            if (dark) document.documentElement.classList.add('dark');
+        })();
+    </script>
 
     <script type="text/javascript">
         (function (c, l, a, r, i, t, y) {
@@ -43,21 +53,23 @@
                             "secondary-container": "#4c1d95",
                             "on-secondary-container": "#ede9fe",
                             "tertiary": "#fcd34d",
-                            "background": "#000000",
-                            "on-background": "#f8fafc",
-                            "surface": "#0a0a0a",
-                            "on-surface": "#f8fafc",
-                            "surface-variant": "#171717",
-                            "on-surface-variant": "#a3a3a3",
-                            "outline": "#404040",
-                            "outline-variant": "#262626",
-                            "surface-container-lowest": "#000000",
-                            "surface-container-low": "#0f0f0f",
-                            "surface-container": "#141414",
-                            "surface-container-high": "#1c1c1c",
-                            "surface-container-highest": "#262626",
+                            "background": "var(--color-background)",
+                            "on-background": "var(--color-on-background)",
+                            "surface": "var(--color-surface)",
+                            "on-surface": "var(--color-on-surface)",
+                            "surface-variant": "var(--color-surface-variant)",
+                            "on-surface-variant": "var(--color-on-surface-variant)",
+                            "outline": "var(--color-outline)",
+                            "outline-variant": "var(--color-outline-variant)",
+                            "surface-container-lowest": "var(--color-surface-container-lowest)",
+                            "surface-container-low": "var(--color-surface-container-low)",
+                            "surface-container": "var(--color-surface-container)",
+                            "surface-container-high": "var(--color-surface-container-high)",
+                            "surface-container-highest": "var(--color-surface-container-highest)",
                             "error": "#ef4444",
-                            "on-error": "#450a0a"
+                            "on-error": "#450a0a",
+                            "input-bg": "var(--color-input-bg)",
+                            "input-text": "var(--color-input-text)"
                         },
                         "borderRadius": {
                             "DEFAULT": "0.125rem",
@@ -90,17 +102,22 @@
     </script>
 </head>
 
-<body class="text-on-background min-h-screen font-body-lg selection:bg-primary selection:text-on-primary bg-background"
-    style="background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px); background-size: 24px 24px; background-color: #000000;">
+<body class="text-on-background min-h-screen font-body-lg selection:bg-primary selection:text-on-primary bg-background transition-colors duration-300"
+    style="background-image: var(--bg-grid); background-size: 24px 24px;">
     <div id="app" v-cloak>
         <!-- TopAppBar (Mobile) -->
         <header
             class="bg-surface/90 backdrop-blur-md border-b border-outline-variant flex justify-between items-center w-full px-gutter h-16 fixed top-0 z-50 md:hidden no-print">
             <h1 class="font-display text-display text-on-surface">{{ businessName }}</h1>
-            <div class="flex gap-4">
+            <div class="flex gap-3 items-center">
+                <!-- Theme Toggle (Mobile) -->
+                <button @click="toggleTheme"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container text-on-surface-variant hover:text-primary hover:border-primary transition-all text-sm">
+                    <span class="material-symbols-outlined text-[18px]" >{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+                    <span class="font-label-mono text-[10px] uppercase hidden xs:block">{{ isDark ? 'Claro' : 'Oscuro' }}</span>
+                </button>
                 <span class="material-symbols-outlined text-primary cursor-pointer"
                     @click="changeTab('settings')">settings</span>
-                <span class="material-symbols-outlined text-primary">notifications</span>
             </div>
         </header>
 
@@ -131,7 +148,17 @@
                 </a>
             </nav>
 
-            <div class="mt-auto border-t border-outline-variant p-2">
+            <div class="mt-auto border-t border-outline-variant p-2 space-y-1">
+                <!-- Theme Toggle (Desktop) -->
+                <button @click="toggleTheme"
+                    class="w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all group">
+                    <span class="material-symbols-outlined transition-transform duration-500" :class="{'rotate-12': isDark, '-rotate-12': !isDark}">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+                    <span class="font-body-sm">{{ isDark ? 'Tema Claro' : 'Tema Oscuro' }}</span>
+                    <!-- Toggle pill -->
+                    <div class="ml-auto w-10 h-5 rounded-full transition-colors duration-300 flex items-center px-0.5" :class="isDark ? 'bg-outline-variant' : 'bg-primary'">
+                        <div class="w-4 h-4 rounded-full shadow transition-all duration-300" :class="isDark ? 'translate-x-0 bg-on-surface-variant' : 'translate-x-5 bg-on-primary'"></div>
+                    </div>
+                </button>
                 <a href="#" @click.prevent="changeTab('settings')"
                     :class="['transition-all px-4 py-3 mx-2 flex items-center gap-3 rounded-lg', activeTab === 'settings' ? 'bg-primary text-on-primary shadow-lg shadow-primary/20 translate-x-1' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest']">
                     <span class="material-symbols-outlined">settings</span>
@@ -172,7 +199,7 @@
                                         de Filamento</label>
                                     <div class="relative">
                                         <select v-model="filamentSelected"
-                                            class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded-sm transition-all outline-none">
+                                            class="theme-input w-full border border-outline px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded-sm transition-all outline-none">
                                             <option :value="null">Seleccionar Filamento</option>
                                             <option v-for="fil in filamentList" :value="fil">{{ fil.text }} - {{
                                                 fil.marca }} ({{ fil.color }}) - {{ currency }} {{ fil.cost }} kg
@@ -188,7 +215,7 @@
                                         (Horas)</label>
                                     <div class="relative">
                                         <input v-model="impressionTime" type="number" placeholder="Ej: 3.5"
-                                            class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                            class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
                                         <span
                                             class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">HRS</span>
                                     </div>
@@ -199,7 +226,7 @@
                                         (Gramos)</label>
                                     <div class="relative">
                                         <input v-model="impressionWeight" type="number" placeholder="Ej: 150"
-                                            class="w-full bg-surface-container-low border border-outline px-md py-sm text-on-surface font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                            class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
                                         <span
                                             class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">GRS</span>
                                     </div>
@@ -313,44 +340,44 @@
                                 <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Nombre
                                     para mostrar</label>
                                 <div
-                                    class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    class="theme-input flex items-center border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
                                     <span
                                         class="material-symbols-outlined text-on-surface-variant text-sm mr-2">label</span>
                                     <input v-model="filamentForm.text" type="text" placeholder="Ej: PLA"
-                                        class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                        class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-mono">
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label
                                     class="font-label-mono text-label-mono text-on-surface-variant uppercase">Marca</label>
                                 <div
-                                    class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    class="theme-input flex items-center border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
                                     <span
                                         class="material-symbols-outlined text-on-surface-variant text-sm mr-2">branding_watermark</span>
                                     <input v-model="filamentForm.marca" type="text" placeholder="Ej: eSUN"
-                                        class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                        class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-mono">
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label
                                     class="font-label-mono text-label-mono text-on-surface-variant uppercase">Color</label>
                                 <div
-                                    class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    class="theme-input flex items-center border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
                                     <span
                                         class="material-symbols-outlined text-on-surface-variant text-sm mr-2">palette</span>
                                     <input v-model="filamentForm.color" type="text" placeholder="Ej: Negro"
-                                        class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                        class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-mono">
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1.5">
                                 <label class="font-label-mono text-label-mono text-on-surface-variant uppercase">Precio
                                     por kg ($)</label>
                                 <div
-                                    class="flex items-center bg-background border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
+                                    class="theme-input flex items-center border border-outline rounded px-3 py-2 focus-within:border-primary transition-colors">
                                     <span
                                         class="material-symbols-outlined text-on-surface-variant text-sm mr-2">payments</span>
                                     <input v-model="filamentForm.cost" type="number" placeholder="50"
-                                        class="bg-transparent border-none p-0 focus:ring-0 w-full text-on-surface font-label-mono">
+                                        class="bg-transparent border-none p-0 focus:ring-0 w-full font-label-mono">
                                 </div>
                             </div>
                             <div class="flex gap-2 mt-4">
@@ -497,10 +524,10 @@
                                         <span class="material-symbols-outlined text-[18px]">bolt</span> Energía / Hora
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
                                         <input v-model="energy" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="0.7" step="0.01">
                                     </div>
                                 </div>
@@ -511,10 +538,10 @@
                                         Hora
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
                                         <input v-model="deprecation" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="0.5" step="0.01">
                                     </div>
                                 </div>
@@ -524,10 +551,10 @@
                                         <span class="material-symbols-outlined text-[18px]">person</span> Operario
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
                                         <input v-model="workingCost" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="5" step="0.01">
                                     </div>
                                 </div>
@@ -537,10 +564,10 @@
                                         <span class="material-symbols-outlined text-[18px]">draw</span> Postprocesado
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
                                         <input v-model="postprocessingCost" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="3" step="0.01">
                                     </div>
                                 </div>
@@ -551,10 +578,10 @@
                                         Empaquetado
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
                                         <input v-model="packagingCost" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="2" step="0.01">
                                     </div>
                                 </div>
@@ -565,10 +592,10 @@
                                         Impuestos (%)
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">% </span>
                                         <input v-model="tax" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="18" step="0.01">
                                     </div>
                                 </div>
@@ -579,10 +606,10 @@
                                         Ganancia (%)
                                     </label>
                                     <div
-                                        class="relative flex items-center bg-black border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">% </span>
                                         <input v-model="profit" type="number"
-                                            class="w-full bg-transparent border-none focus:ring-0 font-label-mono text-headline-md text-on-surface placeholder:text-outline-variant px-2 py-3"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
                                             placeholder="30" step="0.01">
                                     </div>
                                 </div>
@@ -675,7 +702,7 @@
                                     del Negocio
                                 </label>
                                 <input v-model="businessName" type="text"
-                                    class="w-full bg-black border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all rounded px-3 py-3 text-on-surface outline-none"
+                                    class="theme-input w-full border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all rounded px-3 py-3 outline-none"
                                     placeholder="Ej: CreacionesJoJo">
                             </div>
                             <div class="space-y-xs group">
@@ -685,7 +712,7 @@
                                     Lema
                                 </label>
                                 <input v-model="businessSubtitle" type="text"
-                                    class="w-full bg-black border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all rounded px-3 py-3 text-on-surface outline-none"
+                                    class="theme-input w-full border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 transition-all rounded px-3 py-3 outline-none"
                                     placeholder="Ej: 3D Cost Expert">
                             </div>
                             <div class="space-y-xs group md:col-span-2">
@@ -696,7 +723,7 @@
                                 </label>
                                 <div class="relative">
                                     <select v-model="currency"
-                                        class="w-full bg-black border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded px-3 py-3 text-on-surface transition-all outline-none">
+                                        class="theme-input w-full border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded px-3 py-3 transition-all outline-none">
                                         <option value="$">$ (Peso / Dólar)</option>
                                         <option value="€">€ (Euro)</option>
                                         <option value="£">£ (Libra Esterlina)</option>
@@ -839,6 +866,63 @@
     <script src="./assets/main.js"></script>
 
     <style>
+        /* ============================================
+           THEME TOKENS
+           Light theme is :root, dark overrides with html.dark
+        ============================================ */
+        :root {
+            --color-background: #f5f3ff;
+            --color-on-background: #1e1b4b;
+            --color-surface: #ffffff;
+            --color-on-surface: #1e1b4b;
+            --color-surface-variant: #ede9fe;
+            --color-on-surface-variant: #5b21b6;
+            --color-outline: #c4b5fd;
+            --color-outline-variant: #ddd6fe;
+            --color-surface-container-lowest: #ffffff;
+            --color-surface-container-low: #f5f3ff;
+            --color-surface-container: #ede9fe;
+            --color-surface-container-high: #ddd6fe;
+            --color-surface-container-highest: #c4b5fd;
+            --color-input-bg: #0f0f0f;
+            --color-input-text: #f8fafc;
+            --bg-grid: radial-gradient(rgba(109, 40, 217, 0.06) 1px, transparent 1px);
+        }
+
+        html.dark {
+            --color-background: #000000;
+            --color-on-background: #f8fafc;
+            --color-surface: #0a0a0a;
+            --color-on-surface: #f8fafc;
+            --color-surface-variant: #171717;
+            --color-on-surface-variant: #a3a3a3;
+            --color-outline: #404040;
+            --color-outline-variant: #262626;
+            --color-surface-container-lowest: #000000;
+            --color-surface-container-low: #0f0f0f;
+            --color-surface-container: #141414;
+            --color-surface-container-high: #1c1c1c;
+            --color-surface-container-highest: #262626;
+            --color-input-bg: #0f0f0f;
+            --color-input-text: #f8fafc;
+            --bg-grid: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+
+        /* Inputs always have dark bg + white text in both themes */
+        .theme-input {
+            background-color: var(--color-input-bg) !important;
+            color: var(--color-input-text) !important;
+        }
+
+        /* Smooth theme transitions */
+        *, *::before, *::after {
+            transition: background-color 0.25s ease, border-color 0.25s ease, color 0.1s ease;
+        }
+        /* Except transition on animations/transforms to avoid jank */
+        .animate-fadeIn, [class*='translate'], [class*='rotate'], [class*='scale'] {
+            transition: none;
+        }
+
         .animate-fadeIn {
             animation: fadeIn 0.3s ease-in-out;
         }
@@ -856,28 +940,17 @@
         }
 
         @media print {
-
-            body,
-            html,
-            #app {
+            body, html, #app {
                 background: #ffffff !important;
                 color: #171717 !important;
                 background-image: none !important;
             }
-
-            .no-print {
-                display: none !important;
-            }
-
-            .print-only {
-                display: block !important;
-            }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
         }
 
         @media screen {
-            .print-only {
-                display: none !important;
-            }
+            .print-only { display: none !important; }
         }
     </style>
 </body>
