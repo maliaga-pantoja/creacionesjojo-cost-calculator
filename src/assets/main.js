@@ -36,9 +36,22 @@
       }
       // ──────────────────────────────────────────────────────
 
-      let filamentSelected = ref(null)
       let impressionTime = ref()
-      let impressionWeight = ref()
+
+      // Each entry: { filamentSelected: null, impressionWeight: null }
+      const filamentEntries = ref([
+        { filamentSelected: null, impressionWeight: null }
+      ])
+
+      const addFilamentEntry = () => {
+        filamentEntries.value.push({ filamentSelected: null, impressionWeight: null })
+      }
+
+      const removeFilamentEntry = (index) => {
+        if (filamentEntries.value.length > 1) {
+          filamentEntries.value.splice(index, 1)
+        }
+      }
       let additionalComments = ref('')
       let commentsTab = ref('editor')
 
@@ -106,8 +119,8 @@
         }
         // Default filaments
         return [
-          { text: "PLA", cost: "50", marca: "Inkfaill", color: "Blanco" },
-          { text: "ABS", cost: "70", marca: "Inkfaill", color: "Negro" }
+          { text: "PLA", cost: "50", marca: "Inkfaill", color: "Blanco", tipo: "Filamento" },
+          { text: "ABS", cost: "70", marca: "Inkfaill", color: "Negro", tipo: "Filamento" }
         ]
       }
 
@@ -117,7 +130,8 @@
         text: "",
         cost: "",
         marca: "",
-        color: ""
+        color: "",
+        tipo: "Filamento"
       })
       const editingIndex = ref(-1)
 
@@ -135,7 +149,8 @@
           text: filamentForm.value.text,
           cost: filamentForm.value.cost.toString(),
           marca: filamentForm.value.marca,
-          color: filamentForm.value.color
+          color: filamentForm.value.color,
+          tipo: filamentForm.value.tipo || 'Filamento'
         }
 
         if (editingIndex.value === -1) {
@@ -156,7 +171,8 @@
           text: current.text,
           cost: current.cost,
           marca: current.marca,
-          color: current.color
+          color: current.color,
+          tipo: current.tipo || 'Filamento'
         }
       }
 
@@ -177,7 +193,8 @@
           text: "",
           cost: "",
           marca: "",
-          color: ""
+          color: "",
+          tipo: "Filamento"
         }
         editingIndex.value = -1
       }
@@ -189,34 +206,45 @@
       let calculated = ref(false)
 
       const calculate = () => {
-        if (!filamentSelected.value) {
-          alert("Por favor, selecciona un tipo de filamento.")
-          return
-        }
         if (!impressionTime.value || parseFloat(impressionTime.value) <= 0) {
-          alert("Por favor, ingresa un tiempo de impresión válido (mayor a 0).")
+          alert('Por favor, ingresa un tiempo de impresión válido (mayor a 0).')
           return
         }
-        if (!impressionWeight.value || parseFloat(impressionWeight.value) <= 0) {
-          alert("Por favor, ingresa un peso de impresión válido (mayor a 0).")
-          return
+        for (let i = 0; i < filamentEntries.value.length; i++) {
+          const entry = filamentEntries.value[i]
+          if (!entry.filamentSelected) {
+            alert(`Por favor, selecciona un filamento para el material #${i + 1}.`)
+            return
+          }
+          if (!entry.impressionWeight || parseFloat(entry.impressionWeight) <= 0) {
+            alert(`Por favor, ingresa un peso válido (mayor a 0) para el material #${i + 1}.`)
+            return
+          }
         }
 
-        const totalEnergy = parseFloat(energy.value || 0) * parseFloat(impressionTime.value || 0)
-        const totalDeprecation = parseFloat(deprecation.value || 0) * parseFloat(impressionTime.value || 0)
-        const filamentCost = (filamentSelected.value && filamentSelected.value.cost) ? parseFloat(filamentSelected.value.cost) : 0
-        const totalMaterialCost = (parseFloat(impressionWeight.value || 0) / 1000) * filamentCost
-        subtotal.value = totalEnergy + totalDeprecation + totalMaterialCost + parseFloat(workingCost.value || 0) + parseFloat(postprocessingCost.value || 0) + parseFloat(packagingCost.value || 0)
-        subtotalWithProfit.value = Math.round(( (subtotal.value * ( 1 + (parseFloat(profit.value || 0) / 100))) - subtotal.value) * 100) / 100
-        totalTax.value =  Math.round( ((subtotalWithProfit.value +  subtotal.value) * parseFloat(tax.value || 0) / 100) * 100) / 100
-        total.value =  Math.round( (subtotal.value + subtotalWithProfit.value + totalTax.value) * 100) / 100
+        const time = parseFloat(impressionTime.value || 0)
+        const totalEnergy = parseFloat(energy.value || 0) * time
+        const totalDeprecation = parseFloat(deprecation.value || 0) * time
+
+        let totalMaterialCost = 0
+        for (const entry of filamentEntries.value) {
+          const filamentCost = entry.filamentSelected?.cost ? parseFloat(entry.filamentSelected.cost) : 0
+          totalMaterialCost += (parseFloat(entry.impressionWeight || 0) / 1000) * filamentCost
+        }
+
+        subtotal.value = totalEnergy + totalDeprecation + totalMaterialCost
+          + parseFloat(workingCost.value || 0)
+          + parseFloat(postprocessingCost.value || 0)
+          + parseFloat(packagingCost.value || 0)
+        subtotalWithProfit.value = Math.round(((subtotal.value * (1 + (parseFloat(profit.value || 0) / 100))) - subtotal.value) * 100) / 100
+        totalTax.value = Math.round(((subtotalWithProfit.value + subtotal.value) * parseFloat(tax.value || 0) / 100) * 100) / 100
+        total.value = Math.round((subtotal.value + subtotalWithProfit.value + totalTax.value) * 100) / 100
         calculated.value = true
       }
 
       const restart = () => {
-        filamentSelected.value = null
         impressionTime.value = null
-        impressionWeight.value = null
+        filamentEntries.value = [{ filamentSelected: null, impressionWeight: null }]
         additionalComments.value = ''
         subtotal.value = 0
         subtotalWithProfit.value = 0
@@ -243,9 +271,8 @@
         activeTab, changeTab,
         isDark, toggleTheme,
         impressionTime,
-        filamentSelected,
+        filamentEntries, addFilamentEntry, removeFilamentEntry,
         filamentList,
-        impressionWeight,
         tax, profit,
         calculate, restart,
         subtotal, subtotalWithProfit, totalTax, total, calculated,

@@ -202,43 +202,69 @@
                                     Cotización 3D</h2>
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-                                <div class="col-span-1 md:col-span-2">
-                                    <label class="form-label mb-xs">Tipo
-                                        de Filamento</label>
-                                    <div class="relative">
-                                        <select v-model="filamentSelected"
-                                            class="theme-input w-full border border-outline px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded-sm transition-all outline-none">
-                                            <option :value="null">Seleccionar Filamento</option>
-                                            <option v-for="fil in filamentList" :value="fil">{{ fil.text }} - {{
-                                                fil.marca }} ({{ fil.color }}) - {{ currency }} {{ fil.cost }} kg
-                                            </option>
-                                        </select>
-                                        <span
-                                            class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-primary/60">expand_more</span>
-                                    </div>
+                            <!-- Tiempo de impresion (unico para todo el trabajo) -->
+                            <div class="mb-md">
+                                <label class="form-label mb-xs">Tiempo de Impresión (Horas)</label>
+                                <div class="relative">
+                                    <input v-model="impressionTime" type="number" placeholder="Ej: 3.5"
+                                        class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                    <span
+                                        class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">HRS</span>
                                 </div>
-                                <div>
-                                    <label class="form-label mb-xs">Tiempo
-                                        (Horas)</label>
-                                    <div class="relative">
-                                        <input v-model="impressionTime" type="number" placeholder="Ej: 3.5"
-                                            class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                            </div>
+
+                            <!-- Materiales (dinamico) -->
+                            <div class="space-y-sm">
+                                <div v-for="(entry, index) in filamentEntries" :key="index"
+                                    class="border border-outline-variant rounded-sm p-sm space-y-sm relative">
+
+                                    <!-- Entry header -->
+                                    <div class="flex items-center justify-between">
                                         <span
-                                            class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">HRS</span>
+                                            class="font-label-mono text-[10px] uppercase tracking-widest text-primary">Material
+                                            #{{ index + 1 }}</span>
+                                        <button v-if="filamentEntries.length > 1" @click="removeFilamentEntry(index)"
+                                            type="button"
+                                            class="flex items-center gap-1 text-error hover:bg-error/10 px-2 py-0.5 rounded border border-error/20 transition-all font-label-mono text-[10px] uppercase">
+                                            <span class="material-symbols-outlined text-sm">remove_circle</span>
+                                            Quitar
+                                        </button>
                                     </div>
-                                </div>
-                                <div>
-                                    <label class="form-label mb-xs">Peso
-                                        (Gramos)</label>
-                                    <div class="relative">
-                                        <input v-model="impressionWeight" type="number" placeholder="Ej: 150"
-                                            class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
-                                        <span
-                                            class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">GRS</span>
+
+                                    <!-- Filament selector -->
+                                    <div>
+                                        <!-- <label class="form-label mb-xs">Tipo de Filamento</label> -->
+                                        <div class="relative">
+                                            <select v-model="entry.filamentSelected"
+                                                class="theme-input w-full border border-outline px-md py-sm focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none rounded-sm transition-all outline-none">
+                                                <option :value="null">Seleccionar Material</option>
+                                                <option v-for="fil in filamentList" :value="fil">{{ fil.text }} - {{
+                                                    fil.marca }} ({{ fil.color }}) - {{ currency }} {{ fil.cost }}/kg
+                                                </option>
+                                            </select>
+                                            <span
+                                                class="material-symbols-outlined absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-primary/60">expand_more</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Peso -->
+                                    <div>
+                                        <label class="form-label mb-xs">Peso (Gramos)</label>
+                                        <div class="relative">
+                                            <input v-model="entry.impressionWeight" type="number" placeholder="Ej: 150"
+                                                class="theme-input w-full border border-outline px-md py-sm font-label-mono focus:border-primary focus:ring-1 focus:ring-primary/50 rounded-sm transition-all outline-none">
+                                            <span
+                                                class="absolute right-md top-1/2 -translate-y-1/2 text-primary/40 font-label-mono text-[10px]">GRS</span>
+                                        </div>
                                     </div>
                                 </div>
 
+                                <!-- Agregar material -->
+                                <button @click="addFilamentEntry" type="button"
+                                    class="w-full border border-dashed border-primary/40 text-primary/70 hover:border-primary hover:text-primary hover:bg-primary/5 py-sm rounded-sm transition-all flex items-center justify-center gap-xs font-label-mono text-[11px] uppercase tracking-widest">
+                                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                                    Agregar Material
+                                </button>
                             </div>
                         </section>
 
@@ -368,10 +394,10 @@
                 <header class="flex flex-col gap-2 mt-8 mb-8">
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-primary text-3xl">inventory_2</span>
-                        <h3 class="font-display text-display text-on-surface">Gestión de Filamentos</h3>
+                        <h3 class="font-display text-display text-on-surface">Gestión de Materiales</h3>
                     </div>
                     <p class="text-on-surface-variant font-body-sm max-w-2xl">Administra tu inventario de materiales
-                        para cálculos precisos.</p>
+                        (filamentos y resinas) para cálculos precisos.</p>
                 </header>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
@@ -380,9 +406,22 @@
                         <div class="flex items-center gap-2 mb-2">
                             <span class="material-symbols-outlined text-primary text-sm">add_circle</span>
                             <h4 class="font-headline-md text-headline-md text-primary">{{ editingIndex === -1 ?
-                                'Agregar' : 'Editar' }} Filamento</h4>
+                                'Agregar' : 'Editar' }} Material</h4>
                         </div>
                         <form @submit.prevent="saveFilament" class="flex flex-col gap-sm">
+                            <!-- Tipo de material -->
+                            <div class="flex flex-col gap-1.5">
+                                <label class="form-label mb-1">Tipo de Material</label>
+                                <div class="relative">
+                                    <select v-model="filamentForm.tipo"
+                                        class="theme-input w-full border border-outline rounded px-3 py-2 focus:border-primary focus:ring-1 focus:ring-primary/50 appearance-none transition-all outline-none font-label-mono">
+                                        <option value="Filamento">Filamento</option>
+                                        <option value="Resina">Resina</option>
+                                    </select>
+                                    <span
+                                        class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-primary/60">expand_more</span>
+                                </div>
+                            </div>
                             <div class="flex flex-col gap-1.5">
                                 <label class="form-label mb-1">Nombre
                                     para mostrar</label>
@@ -465,6 +504,9 @@
                                     <tr class="border-b border-outline-variant bg-surface-container-low">
                                         <th
                                             class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">
+                                            Tipo</th>
+                                        <th
+                                            class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">
                                             Nombre</th>
                                         <th
                                             class="px-gutter py-3 font-label-mono text-label-mono text-on-surface-variant uppercase">
@@ -483,6 +525,14 @@
                                 <tbody class="divide-y divide-outline-variant">
                                     <tr v-for="(fil, idx) in filamentList" :key="idx"
                                         class="hover:bg-surface-container-high transition-colors">
+                                        <td class="px-gutter py-4">
+                                            <span
+                                                :class="['inline-flex items-center gap-1 px-2 py-0.5 rounded font-label-mono text-[10px] uppercase tracking-widest', fil.tipo === 'Resina' ? 'bg-secondary/20 text-secondary' : 'bg-primary/10 text-primary']">
+                                                <span class="material-symbols-outlined text-[12px]">{{ fil.tipo ===
+                                                    'Resina' ? 'water_drop' : 'layers' }}</span>
+                                                {{ fil.tipo || 'Filamento' }}
+                                            </span>
+                                        </td>
                                         <td class="px-gutter py-4 font-bold text-on-surface">{{ fil.text }}</td>
                                         <td class="px-gutter py-4 text-on-surface-variant">{{ fil.marca }}</td>
                                         <td class="px-gutter py-4 text-on-surface-variant">{{ fil.color }}</td>
@@ -844,24 +894,28 @@
 
             <!-- Filament Details -->
             <div class="bg-neutral-50 border border-neutral-200 rounded p-4 mb-6">
-                <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-2">Detalles del Material
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-3">Detalles del Material
                 </h3>
-                <div v-if="filamentSelected" class="grid grid-cols-3 gap-4">
-                    <div>
-                        <p class="text-[10px] text-neutral-500 uppercase font-mono">Filamento</p>
-                        <p class="text-sm font-semibold text-neutral-800">{{ filamentSelected.text }}</p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-neutral-500 uppercase font-mono">Marca</p>
-                        <p class="text-sm font-semibold text-neutral-800">{{ filamentSelected.marca }}</p>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-neutral-500 uppercase font-mono">Color</p>
-                        <p class="text-sm font-semibold text-neutral-800">{{ filamentSelected.color }}</p>
-                    </div>
+                <div class="mb-2 flex gap-6 text-[10px] text-neutral-400 font-mono uppercase tracking-wider">
+                    <span class="w-6">#</span>
+                    <span class="w-20">Tipo</span>
+                    <span class="flex-1">Material</span>
+                    <span class="w-24">Marca</span>
+                    <span class="w-24">Color</span>
                 </div>
-                <div v-else>
-                    <p class="text-xs text-neutral-500 italic">No se ha seleccionado ningún filamento.</p>
+                <div v-for="(entry, idx) in filamentEntries" :key="idx"
+                    class="flex gap-6 text-sm border-t border-neutral-200 py-2 items-center">
+                    <span class="w-6 font-mono text-neutral-400">{{ idx + 1 }}</span>
+                    <span class="w-20 text-neutral-500 font-mono text-xs">{{ entry.filamentSelected?.tipo || 'Filamento'
+                        }}</span>
+                    <span class="flex-1 font-semibold text-neutral-800">{{ entry.filamentSelected?.text || '—' }}</span>
+                    <span class="w-24 text-neutral-600">{{ entry.filamentSelected?.marca || '—' }}</span>
+                    <span class="w-24 text-neutral-600">{{ entry.filamentSelected?.color || '—' }}</span>
+                </div>
+                <div class="flex justify-end gap-6 border-t-2 border-neutral-300 pt-2 mt-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Tiempo total</span>
+                    <span class="w-20 text-right font-mono text-sm font-semibold text-neutral-700">{{ impressionTime ||
+                        0 }} hrs</span>
                 </div>
             </div>
 
