@@ -9,7 +9,7 @@
 
     <!-- Theme initialization: runs before Vue to avoid flash -->
     <script>
-        (function() {
+        (function () {
             var stored = localStorage.getItem('theme');
             var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             var dark = stored ? stored === 'dark' : prefersDark;
@@ -102,7 +102,8 @@
     </script>
 </head>
 
-<body class="text-on-background min-h-screen font-body-lg selection:bg-primary selection:text-on-primary bg-background transition-colors duration-300"
+<body
+    class="text-on-background min-h-screen font-body-lg selection:bg-primary selection:text-on-primary bg-background transition-colors duration-300"
     style="background-image: var(--bg-grid); background-size: 24px 24px;">
     <div id="app" v-cloak>
         <!-- TopAppBar (Mobile) -->
@@ -113,8 +114,9 @@
                 <!-- Theme Toggle (Mobile) -->
                 <button @click="toggleTheme"
                     class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant bg-surface-container text-on-surface-variant hover:text-primary hover:border-primary transition-all text-sm">
-                    <span class="material-symbols-outlined text-[18px]" >{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
-                    <span class="font-label-mono text-[10px] uppercase hidden xs:block">{{ isDark ? 'Claro' : 'Oscuro' }}</span>
+                    <span class="material-symbols-outlined text-[18px]">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+                    <span class="font-label-mono text-[10px] uppercase hidden xs:block">{{ isDark ? 'Claro' : 'Oscuro'
+                        }}</span>
                 </button>
                 <span class="material-symbols-outlined text-primary cursor-pointer"
                     @click="changeTab('settings')">settings</span>
@@ -152,11 +154,16 @@
                 <!-- Theme Toggle (Desktop) -->
                 <button @click="toggleTheme"
                     class="w-full flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-all group">
-                    <span class="material-symbols-outlined transition-transform duration-500" :class="{'rotate-12': isDark, '-rotate-12': !isDark}">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
+                    <span class="material-symbols-outlined transition-transform duration-500"
+                        :class="{'rotate-12': isDark, '-rotate-12': !isDark}">{{ isDark ? 'light_mode' : 'dark_mode'
+                        }}</span>
                     <span class="font-body-sm">{{ isDark ? 'Tema Claro' : 'Tema Oscuro' }}</span>
                     <!-- Toggle pill -->
-                    <div class="ml-auto w-10 h-5 rounded-full transition-colors duration-300 flex items-center px-0.5" :class="isDark ? 'bg-outline-variant' : 'bg-primary'">
-                        <div class="w-4 h-4 rounded-full shadow transition-all duration-300" :class="isDark ? 'translate-x-0 bg-on-surface-variant' : 'translate-x-5 bg-on-primary'"></div>
+                    <div class="ml-auto w-10 h-5 rounded-full transition-colors duration-300 flex items-center px-0.5"
+                        :class="isDark ? 'bg-outline-variant' : 'bg-primary'">
+                        <div class="w-4 h-4 rounded-full shadow transition-all duration-300"
+                            :class="isDark ? 'translate-x-0 bg-on-surface-variant' : 'translate-x-5 bg-on-primary'">
+                        </div>
                     </div>
                 </button>
                 <a href="#" @click.prevent="changeTab('settings')"
@@ -300,7 +307,7 @@
                                     </div>
                                     <span
                                         class="font-label-mono text-primary drop-shadow-[0_0_15px_rgba(167,139,250,0.4)] text-2xl font-bold whitespace-nowrap">{{
-                                        currency }} {{ total.toFixed(2) }}</span>
+                                        currency }}{{ total.toFixed(2) }}</span>
                                 </div>
                             </div>
                             <button @click="exportPDF" :disabled="!calculated"
@@ -473,10 +480,11 @@
                 <!-- Dashboard Visual Asset -->
                 <section
                     class="relative w-full h-48 rounded border border-outline-variant mt-lg group bg-surface-container overflow-hidden shadow-xl">
-                    <div class="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/70 to-transparent"></div>
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-surface-container via-surface-container/70 to-transparent">
+                    </div>
                     <div class="absolute bottom-6 left-6 z-10">
-                        <p
-                            class="form-label mb-2 font-bold tracking-widest text-primary">
+                        <p class="form-label mb-2 font-bold tracking-widest text-primary">
                             Technical Insight</p>
                         <p class="font-body-sm text-on-surface-variant max-w-lg">
                             El costo de los filamentos fluctúa según el mercado local. Se recomienda actualizar
@@ -913,16 +921,24 @@
             color: var(--color-form-label);
             transition: color 0.15s ease;
         }
+
         .group:focus-within .form-label {
-            color: #a78bfa; /* primary */
+            color: #a78bfa;
+            /* primary */
         }
 
         /* Smooth theme transitions */
-        *, *::before, *::after {
+        *,
+        *::before,
+        *::after {
             transition: background-color 0.25s ease, border-color 0.25s ease, color 0.1s ease;
         }
+
         /* Except transition on animations/transforms to avoid jank */
-        .animate-fadeIn, [class*='translate'], [class*='rotate'], [class*='scale'] {
+        .animate-fadeIn,
+        [class*='translate'],
+        [class*='rotate'],
+        [class*='scale'] {
             transition: none;
         }
 
@@ -943,17 +959,28 @@
         }
 
         @media print {
-            body, html, #app {
+
+            body,
+            html,
+            #app {
                 background: #ffffff !important;
                 color: #171717 !important;
                 background-image: none !important;
             }
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-only {
+                display: block !important;
+            }
         }
 
         @media screen {
-            .print-only { display: none !important; }
+            .print-only {
+                display: none !important;
+            }
         }
     </style>
 </body>
