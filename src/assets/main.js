@@ -39,6 +39,17 @@
       let filamentSelected = ref(null)
       let impressionTime = ref()
       let impressionWeight = ref()
+      let additionalComments = ref('')
+      let commentsTab = ref('editor')
+
+      const renderMarkdown = (text) => {
+        if (!text) return ''
+        try {
+          return marked.parse(text)
+        } catch (e) {
+          return text
+        }
+      }
 
       // Load operation settings from localStorage
       const loadSettings = () => {
@@ -63,6 +74,7 @@
       let businessName = ref(savedSettings.businessName || 'CreacionesJoJo')
       let businessSubtitle = ref(savedSettings.businessSubtitle || '3D Cost Expert')
       let currency = ref(savedSettings.currency || '$')
+      let quotationTitle = ref(savedSettings.quotationTitle || 'Cotización de Impresión 3D')
 
       const saveSettings = () => {
         const settings = {
@@ -75,7 +87,8 @@
           tax: tax.value,
           businessName: businessName.value,
           businessSubtitle: businessSubtitle.value,
-          currency: currency.value
+          currency: currency.value,
+          quotationTitle: quotationTitle.value
         }
         localStorage.setItem('operation_settings', JSON.stringify(settings))
         alert('¡Configuración guardada exitosamente!')
@@ -204,6 +217,7 @@
         filamentSelected.value = null
         impressionTime.value = null
         impressionWeight.value = null
+        additionalComments.value = ''
         subtotal.value = 0
         subtotalWithProfit.value = 0
         totalTax.value = 0
@@ -237,7 +251,8 @@
         subtotal, subtotalWithProfit, totalTax, total, calculated,
         energy, deprecation, workingCost, postprocessingCost, packagingCost,
         filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings,
-        exportPDF, businessName, businessSubtitle, currency
+        exportPDF, businessName, businessSubtitle, currency, quotationTitle,
+        additionalComments, commentsTab, renderMarkdown
       }
     }
   }).mount('#app')
