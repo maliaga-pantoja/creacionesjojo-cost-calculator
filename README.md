@@ -1,20 +1,26 @@
 # CreacionesJoJo - 3D Cost Expert
 
-Una calculadora de costos profesional y herramienta de gestión orientada a negocios de impresión 3D. Diseñada para ofrecer cotizaciones precisas y administrar inventario de forma reactiva y elegante.
+Una calculadora de costos profesional y herramienta de gestión orientada a negocios de impresión 3D. Diseñada para ofrecer cotizaciones precisas, administrar inventario de forma reactiva y generar documentos PDF personalizados.
 
 ## 🚀 Características Principales
 
-*   **Calculadora de Costos (Cotización 3D):** Estima de forma dinámica el precio final de venta basado en el tiempo de impresión, peso de la pieza y los costos operativos fijos, aplicando automáticamente los impuestos y márgenes de ganancia. Además, permite exportar el resumen generado como PDF.
-*   **Gestión de Filamentos:** Un sistema de inventario (CRUD) para administrar tus bobinas de material (PLA, ABS, PETG, etc.). Los datos se persisten en el navegador.
-*   **Costos de Operación:** Configuración global de gastos base (energía, depreciación de máquinas, mano de obra, postprocesado y empaquetado) para calcular el costo real de producción por hora de forma automática en cada cotización.
+*   **Calculadora de Costos (Cotización 3D):** Estima de forma dinámica el precio final de venta basado en el tiempo de impresión, peso de la pieza y los costos operativos fijos, aplicando automáticamente los impuestos y márgenes de ganancia configurados.
+*   **Comentarios Adicionales con Markdown:** Campo de texto en la sección de cotización que permite agregar notas, instrucciones especiales o condiciones de entrega utilizando sintaxis Markdown. Incluye un editor y una pestaña de vista previa en tiempo real. El contenido aparece renderizado en el PDF exportado, debajo de los detalles del material.
+*   **Exportación a PDF personalizada:** Genera un documento de cotización profesional con los datos del negocio, detalles del material, comentarios adicionales, desglose de costos y total final. El encabezado del PDF (título del documento, nombre del negocio y lema) es completamente configurable desde la sección de Ajustes.
+*   **Gestión de Filamentos:** Sistema de inventario (CRUD) para administrar bobinas de material (PLA, ABS, PETG, etc.). Los datos se persisten en el navegador mediante `localStorage`.
+*   **Costos de Operación:** Configuración global de gastos base por hora (energía, depreciación de máquinas, mano de obra, postprocesado y empaquetado) que se aplican automáticamente a cada cotización.
+*   **Ajustes del Negocio:** Panel de configuración persistente que permite personalizar el nombre del negocio, el subtítulo/lema, el título del documento PDF de cotización y el símbolo de moneda utilizado en toda la interfaz.
+*   **Modo Oscuro / Claro:** Alternancia de tema con persistencia en `localStorage` y respeto a la preferencia del sistema operativo.
 
 ## 🛠 Tecnologías Utilizadas
 
-Esta herramienta es un SPA (Single Page Application) ligero y rápido que no requiere procesos de build complejos:
+Esta herramienta es un SPA (Single Page Application) ligero que no requiere procesos de build complejos:
+
 *   **Vue.js 3 (CDN):** Manejo de estado reactivo y vinculación de datos en tiempo real.
-*   **Tailwind CSS (CDN):** Estilización moderna y responsiva basada en clases de utilidad y variables CSS customizadas ("Bento-style").
-*   **LocalStorage:** Persistencia de datos del lado del cliente (inventario de filamentos y configuración de operación) sin necesidad de backend o base de datos.
-*   **Material Symbols:** Iconografía proveída por Google Fonts.
+*   **Tailwind CSS (CDN):** Estilización moderna y responsiva basada en clases de utilidad y variables CSS personalizadas.
+*   **marked.js (CDN):** Parser de Markdown para renderizar los comentarios adicionales tanto en la vista previa de la interfaz como en el PDF exportado.
+*   **LocalStorage:** Persistencia del lado del cliente para el inventario de filamentos, costos de operación y ajustes del negocio. No requiere backend ni base de datos.
+*   **Material Symbols:** Iconografía provista por Google Fonts.
 
 ## 🏃‍♂️ Cómo Ejecutar (How To)
 
@@ -26,19 +32,10 @@ Si tienes `make` instalado, simplemente ejecuta:
 make run
 ```
 
-### Otras alternativas
-Si tienes Python instalado:
-```bash
-python -m http.server 8000
-```
-O usando Node (si tienes `http-server` global):
-```bash
-npx http-server .
-```
-
-Luego, abre `http://localhost:8000` o la URL que te provea el servidor en tu navegador web.
 
 ## 📋 Roadmap (Próximas Mejoras)
 - [x] Generación de documento PDF para cotizaciones.
 - [x] Consolidar variables operativas y guardarlas persistentemente.
+- [x] Campo de comentarios adicionales con soporte Markdown en la cotización.
+- [x] Título del documento PDF configurable desde Ajustes.
 - [ ] Gráfico de historial de tendencias de costos (Cost Variation Trends).
