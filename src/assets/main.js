@@ -76,7 +76,8 @@
       }
       const savedSettings = loadSettings()
 
-      let energy = ref(savedSettings.energy !== undefined && savedSettings.energy !== null ? savedSettings.energy : 0.7)
+      let energyKwh = ref(savedSettings.energyKwh !== undefined && savedSettings.energyKwh !== null ? savedSettings.energyKwh : 0.2)
+      let energyCostKwh = ref(savedSettings.energyCostKwh !== undefined && savedSettings.energyCostKwh !== null ? savedSettings.energyCostKwh : 0.15)
       let deprecation = ref(savedSettings.deprecation !== undefined && savedSettings.deprecation !== null ? savedSettings.deprecation : 0.5)
       let workingCost = ref(savedSettings.workingCost !== undefined && savedSettings.workingCost !== null ? savedSettings.workingCost : 5)
       let postprocessingCost = ref(savedSettings.postprocessingCost !== undefined && savedSettings.postprocessingCost !== null ? savedSettings.postprocessingCost : 3)
@@ -91,7 +92,8 @@
 
       const saveSettings = () => {
         const settings = {
-          energy: energy.value,
+          energyKwh: energyKwh.value,
+          energyCostKwh: energyCostKwh.value,
           deprecation: deprecation.value,
           workingCost: workingCost.value,
           postprocessingCost: postprocessingCost.value,
@@ -223,7 +225,7 @@
         }
 
         const time = parseFloat(impressionTime.value || 0)
-        const totalEnergy = parseFloat(energy.value || 0) * time
+        const totalEnergy = parseFloat(energyKwh.value || 0) * parseFloat(energyCostKwh.value || 0) * time
         const totalDeprecation = parseFloat(deprecation.value || 0) * time
 
         let totalMaterialCost = 0
@@ -254,7 +256,8 @@
 
         // Restablecer costos de operación a sus valores guardados o predeterminados
         const currentSettings = loadSettings()
-        energy.value = currentSettings.energy !== undefined && currentSettings.energy !== null ? currentSettings.energy : 0.7
+        energyKwh.value = currentSettings.energyKwh !== undefined && currentSettings.energyKwh !== null ? currentSettings.energyKwh : 0.2
+        energyCostKwh.value = currentSettings.energyCostKwh !== undefined && currentSettings.energyCostKwh !== null ? currentSettings.energyCostKwh : 0.15
         deprecation.value = currentSettings.deprecation !== undefined && currentSettings.deprecation !== null ? currentSettings.deprecation : 0.5
         workingCost.value = currentSettings.workingCost !== undefined && currentSettings.workingCost !== null ? currentSettings.workingCost : 5
         postprocessingCost.value = currentSettings.postprocessingCost !== undefined && currentSettings.postprocessingCost !== null ? currentSettings.postprocessingCost : 3
@@ -276,7 +279,7 @@
         tax, profit,
         calculate, restart,
         subtotal, subtotalWithProfit, totalTax, total, calculated,
-        energy, deprecation, workingCost, postprocessingCost, packagingCost,
+        energyKwh, energyCostKwh, deprecation, workingCost, postprocessingCost, packagingCost,
         filamentForm, editingIndex, saveFilament, editFilament, deleteFilament, clearForm, saveSettings,
         exportPDF, businessName, businessSubtitle, currency, quotationTitle,
         additionalComments, commentsTab, renderMarkdown

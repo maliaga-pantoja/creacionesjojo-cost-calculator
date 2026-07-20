@@ -616,15 +616,29 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
                                 <div class="space-y-xs group">
                                     <label class="form-label">
-                                        <span class="material-symbols-outlined text-[18px]">bolt</span> Energía / Hora
+                                        <span class="material-symbols-outlined text-[18px]">bolt</span> Consumo Impresora (kW/h)
+                                    </label>
+                                    <div
+                                        class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
+                                        <span class="pl-3 font-label-mono text-outline">kW </span>
+                                        <input v-model="energyKwh" type="number"
+                                            class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
+                                            placeholder="0.2" step="0.01">
+                                    </div>
+                                    <p class="font-label-mono text-[9px] text-on-surface-variant opacity-60">Potencia de la impresora en kilowatts</p>
+                                </div>
+                                <div class="space-y-xs group">
+                                    <label class="form-label">
+                                        <span class="material-symbols-outlined text-[18px]">electric_bolt</span> Costo del kW/h
                                     </label>
                                     <div
                                         class="theme-input relative flex items-center border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/50 transition-all overflow-hidden rounded">
                                         <span class="pl-3 font-label-mono text-outline">{{ currency }} </span>
-                                        <input v-model="energy" type="number"
+                                        <input v-model="energyCostKwh" type="number"
                                             class="bg-transparent border-none focus:ring-0 font-label-mono text-headline-md placeholder:text-outline-variant px-2 py-3 w-full"
-                                            placeholder="0.7" step="0.01">
+                                            placeholder="0.15" step="0.001">
                                     </div>
+                                    <p class="font-label-mono text-[9px] text-on-surface-variant opacity-60">Precio que cobra la empresa eléctrica por kW/h</p>
                                 </div>
                                 <div class="space-y-xs group">
                                     <label class="form-label">
