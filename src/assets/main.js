@@ -5,7 +5,7 @@
   
   createApp({
     setup() {
-      let activeTab = ref('filamentos')
+      let activeTab = ref('materiales')
       
       const changeTab = (tab) => {
         activeTab.value = tab
